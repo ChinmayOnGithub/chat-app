@@ -14,6 +14,9 @@
     // "allowImportingTsExtensions": true,
     "verbatimModuleSyntax": true,
     "outDir": "dist",
+    "rootDir": ".",
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
     "noEmit": false,
     // Best practices
     "strict": true,

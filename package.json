@@ -3,10 +3,16 @@
   "module": "index.ts",
   "type": "module",
   "devDependencies": {
-    "@types/bun": "latest"
+    "@types/bun": "latest",
+    "@types/express": "^5.0.3",
+    "@types/node": "^24.9.1",
+    "@types/ws": "^8.18.1",
+    "nodemon": "^3.1.10",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
   },
   "scripts": {
-    "dev": "ts-node index.ts",
+    "dev": "nodemon --watch './**/*.ts' --exec 'ts-node' index.ts",
     "build": "tsc",
     "start": "node dist/index.js"
   },
@@ -14,11 +20,7 @@
     "typescript": "^5.9.3"
   },
   "dependencies": {
-    "@types/express": "^5.0.3",
-    "@types/node": "^24.9.1",
-    "@types/ws": "^8.18.1",
     "express": "^5.1.0",
-    "ts-node": "^10.9.2",
     "ws": "^8.18.3"
   }
 }

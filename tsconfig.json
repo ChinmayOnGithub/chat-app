@@ -1,32 +1,18 @@
 {
   "compilerOptions": {
-    // Environment setup & latest features
-    "lib": [
-      "ESNext"
-    ],
-    "target": "ESNext",
-    "module": "Preserve",
-    "moduleDetection": "force",
-    "jsx": "react-jsx",
-    "allowJs": true,
-    // Bundler mode
-    "moduleResolution": "bundler",
-    // "allowImportingTsExtensions": true,
-    "verbatimModuleSyntax": true,
-    "outDir": "dist",
-    "rootDir": ".",
-    "esModuleInterop": true,
+    "target": "ES2020", // modern JS
+    "module": "esnext", // Node-friendly
+    "moduleResolution": "node", // resolve Node modules
+    "outDir": "dist", // compiled JS output
+    "rootDir": ".", // your source files
+    "esModuleInterop": true, // for default imports
     "forceConsistentCasingInFileNames": true,
-    "noEmit": false,
-    // Best practices
     "strict": true,
     "skipLibCheck": true,
-    "noFallthroughCasesInSwitch": true,
-    "noUncheckedIndexedAccess": true,
-    "noImplicitOverride": true,
-    // Some stricter flags (disabled by default)
-    "noUnusedLocals": false,
-    "noUnusedParameters": false,
-    "noPropertyAccessFromIndexSignature": false
-  }
+    "resolveJsonModule": true,
+    "allowJs": true
+  },
+  "include": [
+    "**/*.ts"
+  ]
 }

@@ -15,25 +15,23 @@ import { randomUUID } from "crypto";
 // const __filename = fileURLToPath(import.meta.url);
 // const __dirname = path.dirname(__filename);
 
-// const app = express();
-// const PORT = 8000;
+const app = express();
+const PORT = 8000;
 
 
 // app.get('/', (_: Request, res: Response) => {
 //   res.sendFile(path.join(__dirname, 'index.html'));
 // })
 
-// const server = app.listen(PORT, () => {
-//   console.log(`Server listening on port ${PORT}`);
-// })
+const server = app.listen(PORT, () => {
+  console.log(`Server listening on port ${PORT}`);
+})
 
 const clients = new Map<WebSocket, { userId: string; username?: string }>();
 
 // const app = express();
 const wss = new WebSocketServer({
-  port: 8000,
-  // Optional if frontend on a different domain
-  clientTracking: true
+  server
 });
 
 wss.on('headers', (headers, req) => {

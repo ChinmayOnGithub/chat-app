@@ -5,6 +5,7 @@
 
 import WebSocket, { WebSocketServer } from 'ws';
 import express from 'express';
+import type { Request, Response } from 'express';
 import { randomUUID } from "crypto";
 
 import path from 'path';
@@ -18,7 +19,7 @@ const app = express();
 const PORT = 8000;
 
 
-app.get('/', (_, res) => {
+app.get('/', (_: Request, res: Response) => {
   res.sendFile(path.join(__dirname, 'index.html'));
 })
 

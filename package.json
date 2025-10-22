@@ -13,13 +13,14 @@
   },
   "scripts": {
     "dev": "nodemon --watch './**/*.ts' --exec 'ts-node' index.ts",
-    "build": "tsc",
+    "build": "tsc && cpx \"*.html\" dist/",
     "start": "node dist/index.js"
   },
   "peerDependencies": {
     "typescript": "^5.9.3"
   },
   "dependencies": {
+    "cpx": "^1.5.0",
     "express": "^5.1.0",
     "ws": "^8.18.3"
   }

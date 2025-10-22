@@ -38,6 +38,11 @@ wss.on('connection', (ws: any) => {
   clients.set(ws, { userId });
 
 
+  const clientInfo = clients.get(ws);
+  if (!clientInfo) return;
+
+
+
 
   ws.on('message', (raw: any) => {
     let msg;
@@ -54,9 +59,6 @@ wss.on('connection', (ws: any) => {
       return;
     }
 
-    const clientInfo = clients.get(ws);
-    if (!clientInfo) return;
-
     if (msg.type === 'identify' && typeof msg.username === 'string') {
       clientInfo.username = msg.username.slice(0, 32); // limit length
       ws.send(JSON.stringify(
@@ -64,9 +66,18 @@ wss.on('connection', (ws: any) => {
           system: true,
           message: `Hello ${clientInfo.username}!`
         }));
+
+      // Broadcast join to others
+      wss.clients.forEach(client => {
+        if (client !== ws && client.readyState === WebSocket.OPEN) {
+          client.send(JSON.stringify({
+            system: true,
+            message: `${clientInfo.username} joined the chat`
+          }));
+        }
+      });
       return;
     }
-
 
     if (msg.type === 'message' && typeof msg.text === 'string') {
       const payload = JSON.stringify({
@@ -83,18 +94,14 @@ wss.on('connection', (ws: any) => {
     }
 
 
-    // When a user connects
-    wss.clients.forEach((client: any) => {
-      if (client !== ws && client.readyState === WebSocket.OPEN) {
-        client.send(JSON.stringify({
-          system: true,
-          message: `${clientInfo.username ?? clientInfo.userId} joined the chat`
-        }));
-      }
-    });
+  });
 
-    // When a user disconnects
-    wss.clients.forEach((client: any) => {
+  ws.on('close', () => {
+    console.log('Client disconnected');
+    const clientInfo = clients.get(ws);
+    if (!clientInfo) return;
+
+    wss.clients.forEach(client => {
       if (client.readyState === WebSocket.OPEN) {
         client.send(JSON.stringify({
           system: true,
@@ -102,12 +109,8 @@ wss.on('connection', (ws: any) => {
         }));
       }
     });
-
-
-  });
-
-  ws.on('close', () => {
-    console.log('Client disconnected');
     clients.delete(ws);
+
+
   });
 })

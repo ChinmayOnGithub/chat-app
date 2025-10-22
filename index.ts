@@ -8,29 +8,37 @@ import express from 'express';
 import type { Request, Response } from 'express';
 import { randomUUID } from "crypto";
 
-import path from 'path';
-import { fileURLToPath } from 'url';
+// import path from 'path';
+// import { fileURLToPath } from 'url';
 
 // Required in ESM (since __dirname doesn’t exist)
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+// const __filename = fileURLToPath(import.meta.url);
+// const __dirname = path.dirname(__filename);
 
-const app = express();
-const PORT = 8000;
+// const app = express();
+// const PORT = 8000;
 
 
-app.get('/', (_: Request, res: Response) => {
-  res.sendFile(path.join(__dirname, 'index.html'));
-})
+// app.get('/', (_: Request, res: Response) => {
+//   res.sendFile(path.join(__dirname, 'index.html'));
+// })
 
-const server = app.listen(PORT, () => {
-  console.log(`Server listening on port ${PORT}`);
-})
+// const server = app.listen(PORT, () => {
+//   console.log(`Server listening on port ${PORT}`);
+// })
 
 const clients = new Map<WebSocket, { userId: string; username?: string }>();
 
 // const app = express();
-const wss = new WebSocketServer({ server });
+const wss = new WebSocketServer({
+  port: 8000,
+  // Optional if frontend on a different domain
+  clientTracking: true
+});
+
+wss.on('headers', (headers, req) => {
+  headers.push('Access-Control-Allow-Origin: *');
+});
 
 wss.on('connection', (ws: any) => {
   console.log(`${ws.id} joined`);

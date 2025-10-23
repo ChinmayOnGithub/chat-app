@@ -89,7 +89,8 @@ wss.on('connection', (ws: any) => {
       const payload = JSON.stringify({
         id: clientInfo.userId,
         username: clientInfo.username ?? clientInfo.userId,
-        message: msg.text
+        message: msg.text,
+        system: false
       });
 
       wss.clients.forEach((client: any) => {
@@ -104,19 +105,24 @@ wss.on('connection', (ws: any) => {
 
   ws.on('close', () => {
     console.log('Client disconnected');
+
+
     const clientInfo = clients.get(ws);
     if (!clientInfo) return;
 
-    wss.clients.forEach(client => {
-      if (client.readyState === WebSocket.OPEN) {
-        client.send(JSON.stringify({
-          system: true,
-          message: `${clientInfo.username ?? clientInfo.userId} left the chat`
-        }));
-      }
-    });
     clients.delete(ws);
 
+    if (clientInfo.username) {
+      wss.clients.forEach(client => {
+        if (client.readyState === WebSocket.OPEN) {
+          client.send(JSON.stringify({
+            system: true,
+            message: `${clientInfo.username ?? clientInfo.userId} left the chat`
+          }));
+        }
+      });
+    }
 
+    console.log(`Client ${clientInfo.username ?? clientInfo.userId} disconnected`);
   });
 })

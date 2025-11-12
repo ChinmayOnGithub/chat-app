@@ -5,8 +5,8 @@
 
 import WebSocket, { WebSocketServer } from 'ws';
 import express from 'express';
-import type { Request, Response } from 'express';
 import { randomUUID } from "crypto";
+import client from 'prom-client';
 
 // import path from 'path';
 // import { fileURLToPath } from 'url';
@@ -18,6 +18,34 @@ import { randomUUID } from "crypto";
 const app = express();
 const PORT = 8000;
 
+// Prometheus metrics setup
+const register = new client.Registry();
+client.collectDefaultMetrics({ register });
+
+// Custom metrics
+const wsConnectionsGauge = new client.Gauge({
+  name: 'websocket_connections_total',
+  help: 'Total number of active WebSocket connections',
+  registers: [register]
+});
+
+const wsMessagesCounter = new client.Counter({
+  name: 'websocket_messages_total',
+  help: 'Total number of WebSocket messages received',
+  labelNames: ['type'],
+  registers: [register]
+});
+
+// Health check endpoint for container orchestration
+app.get('/healthz', (_, res) => {
+  res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
+// Metrics endpoint for Prometheus
+app.get('/metrics', async (_, res) => {
+  res.set('Content-Type', register.contentType);
+  res.send(await register.metrics());
+});
 
 // app.get('/', (_: Request, res: Response) => {
 //   res.sendFile(path.join(__dirname, 'index.html'));
@@ -42,6 +70,9 @@ wss.on('connection', (ws: any) => {
   console.log(`${ws.id} joined`);
   const userId = randomUUID().slice(0, 8);
   clients.set(ws, { userId });
+  
+  // Update metrics
+  wsConnectionsGauge.set(clients.size);
 
 
   const clientInfo = clients.get(ws);
@@ -67,6 +98,7 @@ wss.on('connection', (ws: any) => {
 
     if (msg.type === 'identify' && typeof msg.username === 'string') {
       clientInfo.username = msg.username.slice(0, 32); // limit length
+      wsMessagesCounter.inc({ type: 'identify' });
       ws.send(JSON.stringify(
         {
           system: true,
@@ -86,6 +118,7 @@ wss.on('connection', (ws: any) => {
     }
 
     if (msg.type === 'message' && typeof msg.text === 'string') {
+      wsMessagesCounter.inc({ type: 'message' });
       const payload = JSON.stringify({
         id: clientInfo.userId,
         username: clientInfo.username ?? clientInfo.userId,
@@ -111,6 +144,9 @@ wss.on('connection', (ws: any) => {
     if (!clientInfo) return;
 
     clients.delete(ws);
+    
+    // Update metrics
+    wsConnectionsGauge.set(clients.size);
 
     if (clientInfo.username) {
       wss.clients.forEach(client => {
